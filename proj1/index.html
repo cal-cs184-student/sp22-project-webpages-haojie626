@@ -182,7 +182,31 @@
               <h2 align="middle">Section II: Sampling</h2>
 
               <h3 align="middle">Part 4: Barycentric coordinates</h3>
+              <p>
+                  Barycentric coordinates are values that represent proportions within a triangle.
+                  They are basically weights for each vertex and when applied on vertex values, we can interpolate the values to get a weighted average of those values.
+                  The vertex values can be anything such as colors, coordinates, and vectors.
+                  When applied to colors, barycentric coordinates produce a weighted "blend" of the three colors.
+                  <br /> <br />
+                  Take a look at the image blow. Each vertex is colored red, green, or blue. Between each vertex however, we can leverage barycentric coordinates to produce a blended color.
+              </p>
 
+              <div align="middle">
+                  <table style="width=100%">
+                      <tr>
+                          <td>
+                              <img src="images/triangle.png" align="middle" width="500px" />
+                              <figcaption align="middle">Triangle interpolated using barycentric coordinates.</figcaption>
+                          </td>
+                      </tr>
+                      <tr>
+                          <td>
+                              <img src="images/image41.png" align="middle" width="500px" />
+                              <figcaption align="middle">Color wheel generated using barycentric coordinates.</figcaption>
+                          </td>
+                      </tr>
+                  </table>
+              </div>
 
               <h3 align="middle">Part 5: "Pixel sampling" for texture mapping</h3>
 
