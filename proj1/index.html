@@ -30,104 +30,152 @@
 
     <br /><br />
 
-    <div>
+          <div>
 
-        <h2 align="middle">Overview</h2>
-        <p>Give a high-level overview of what you implemented in this project. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the project.</p>
+              <h2 align="middle">Overview</h2>
+              <p>Give a high-level overview of what you implemented in this project. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the project.</p>
 
-        <h2 align="middle">Section I: Rasterization</h2>
+              <h2 align="middle">Section I: Rasterization</h2>
 
-        <h3 align="middle">Part 1: Rasterizing single-color triangles</h3>
-        <p>
-            In this task, we rasterize triangles given a color and three (x,y) points: p0, p1, p2. <br />
-            <h4>Point-In-Triangle Testing</h4>
-            Using these three points, we calculate all three tangent vectors between points p0, p1, and p2. <br />
-            The tangent vectors are calculated as follows:<br />
-            <ul>
-                <li>T1 = P1 - P0 = (x1 - x0, y1 - y0)</li>
-                <li>T2 = P2 - P1 = (x2 - x1, y2 - y1)</li>
-                <li>T3 = P0 - P2 = (x0 - x2, y0 - y2)</li>
-            </ul>
+              <h3 align="middle">Part 1: Rasterizing single-color triangles</h3>
+              <p>
+                  In this task, we rasterize triangles given a color and three (x,y) points: p0, p1, p2. <br />
+                  <h4>Point-In-Triangle Testing</h4>
+                  Using these three points, we calculate all three tangent vectors between points p0, p1, and p2. <br />
+                  The tangent vectors are calculated as follows:<br />
+                  <ul>
+                      <li>T1 = P1 - P0 = (x1 - x0, y1 - y0)</li>
+                      <li>T2 = P2 - P1 = (x2 - x1, y2 - y1)</li>
+                      <li>T3 = P0 - P2 = (x0 - x2, y0 - y2)</li>
+                  </ul>
 
-            These three vectors will form the "edges" of the triangle.
-            When we later sample points to determine if they are inside the triangle, it will primarily be determined by seeing which side of each edge the point lies on. <br /> <br />
-            The normal/perpendicular vectors of each tangent vector can then be obtained by swapping x and y and negating y:
-            <ul>
-                <li>N1 = (-T1.y,T1.x)</li>
-                <li>N2 = (-T2.y,T2.x)</li>
-                <li>N3 = (-T3.y,T3.x)</li>
-            </ul>
-            After obtaining our three perpendicular vectors, we are finally ready to determine the points that we want to sample! <br />
-            It makes sense that the points we want to sample should be relatively close to the triangle as sampling every pixel in the framebuffer per triangle would be extremely costly and inefficient.
-            In my implementation, I determined the minimum X and Y values as well as the maximum X and Y values based on the given three points.
-            Sampling every pixel between the minimum and maximum X and Y values gives us a decent approximation of where all the points that would be in the triangle will be.
-            Importantly, we want to sample in the middle of each pixel so we must add .5 to both x and y values of the sampling point.<br /> <br />
+                  These three vectors will form the "edges" of the triangle.
+                  When we later sample points to determine if they are inside the triangle, it will primarily be determined by seeing which side of each edge the point lies on. <br /> <br />
+                  The normal/perpendicular vectors of each tangent vector can then be obtained by swapping x and y and negating y:
+                  <ul>
+                      <li>N1 = (-T1.y,T1.x)</li>
+                      <li>N2 = (-T2.y,T2.x)</li>
+                      <li>N3 = (-T3.y,T3.x)</li>
+                  </ul>
+                  After obtaining our three perpendicular vectors, we are finally ready to determine the points that we want to sample! <br />
+                  It makes sense that the points we want to sample should be relatively close to the triangle as sampling every pixel in the framebuffer per triangle would be extremely costly and inefficient.
+                  In my implementation, I determined the minimum X and Y values as well as the maximum X and Y values based on the given three points.
+                  Sampling every pixel between the minimum and maximum X and Y values gives us a decent approximation of where all the points that would be in the triangle will be.
+                  Importantly, we want to sample in the middle of each pixel so we must add .5 to both x and y values of the sampling point.<br /> <br />
 
-            For every point that we are sampling, we generate a sampling vector to that point from each point p0, p1, and p2. <br />
-            By getting the dot product of the sampling vector with origin p0 and the normal vector with the same origin point (N1),
-            we obtain a value that determines if the sampling vector is on the same side as the normal vector relative to the tangent vector.
-            Two more values are obtained by performing the same calculation with sampling vectors of origin p1 and p2. <br /> <br />
+                  For every point that we are sampling, we generate a sampling vector to that point from each point p0, p1, and p2. <br />
+                  By getting the dot product of the sampling vector with origin p0 and the normal vector with the same origin point (N1),
+                  we obtain a value that determines if the sampling vector is on the same side as the normal vector relative to the tangent vector.
+                  Two more values are obtained by performing the same calculation with sampling vectors of origin p1 and p2. <br /> <br />
 
-            After obtaining all three values, We can determine if the sampled point is inside the triangle formed by points p0, p1, and p2. <br />
-            If all three values have the same sign, then the point is inside the triangle because by calculating the tangent vectors in a clockwise/counter-clockwise fashion,
-            the normal vectors will all point outward or all point inward. <br />
-            <ul>
-                <li>
-                    If the normal vectors all point inward and the point is inside the triangle, then we obtain values all greater than 0.
-                </li>
-                <li>
-                    If the normal vectors all point outward and the point is inside the triangle, then we obtain values all less than 0.
-                </li>
-            </ul>
-            In order to handle edge cases, we accept conditions where the value is equal to 0.<br /> <br />
+                  After obtaining all three values, We can determine if the sampled point is inside the triangle formed by points p0, p1, and p2. <br />
+                  If all three values have the same sign, then the point is inside the triangle because by calculating the tangent vectors in a clockwise/counter-clockwise fashion,
+                  the normal vectors will all point outward or all point inward. <br />
+                  <ul>
+                      <li>
+                          If the normal vectors all point inward and the point is inside the triangle, then we obtain values all greater than 0.
+                      </li>
+                      <li>
+                          If the normal vectors all point outward and the point is inside the triangle, then we obtain values all less than 0.
+                      </li>
+                  </ul>
+                  In order to handle edge cases, we accept conditions where the value is equal to 0.<br /> <br />
 
-            If either condition is satisfied, then we fill in the pixel corresponding to that sampled point with the provided color value.
+                  If either condition is satisfied, then we fill in the pixel corresponding to that sampled point with the provided color value.
 
-        </p>
+              </p>
 
-        <p>
-            <h4>Efficiency</h4>
-            By sampling only the points between the minimum and maximum X and Y points, we are basically sampling the points that form a box around the triangle.
-            This algorithm is no worse than one that checks each sample within the bounding box of the triangle because that is exactly what it does!
-        </p>
+              <p>
+                  <h4>Efficiency</h4>
+                  By sampling only the points between the minimum and maximum X and Y points, we are basically sampling the points that form a box around the triangle.
+                  This algorithm is no worse than one that checks each sample within the bounding box of the triangle because that is exactly what it does.
+              </p>
 
-        <p> In the screenshot below, we can observe a sampled image of basic/test4.svg</p>
-        <div align="middle">
-          <table style="width=100%">
-            <tr>
-              <td>
-                <img src="images/image1.png" align="middle" width="400px"/>
-                <figcaption align="middle">Caption goes here.</figcaption>
-              </td>
-            </tr>
-          </table>
-        </div>
-        <h3 align="middle">Part 2: Antialiasing triangles</h3>
+              <p> In the screenshot below, we can observe a sampled image of basic/test4.svg. As you can see, the bottom right corner of the image has some aliasing.</p>
+              <div align="middle">
+                  <table style="width=100%">
+                      <tr>
+                          <td>
+                              <img src="images/image1.png" align="middle" width="600px" />
+                              <figcaption align="middle">basic/test4.svg at default viewing parameters.</figcaption>
+                          </td>
+                      </tr>
+                  </table>
+              </div>
+
+              <h3 align="middle">Part 2: Antialiasing triangles</h3>
+              <p>
+                  We are tasked with smoothing out our triangles! To accomplish this task, we can perform antialiasing by supersampling.
+                  Supersampling is when we sample more than one location per pixel.
+                  You may ask, why are we sampling more than once per pixel if we are still limited to one color per pixel?
+                  The solution is simple, we average the samples and output the average color!
+                  This is a more accurate representation of what is going on within each pixel and can produce better looking images at the cost of performance.
+                  <h4>
+                      Antialiasing Procedure and Modifications to Rasterization Pipeline
+                  </h4>
+                  In order to perform supersampling, our sample buffer needs to be modified to support the increased number of samples per pixel
+                  (The sample buffer is a 1-dimensional array storing Color objects for each sample location).
+                  This can be accomplished by resizing the sample buffer to: width * height * sample rate. <br /> <br />
+                  Now, we must determine the locations in each pixel to sample. Ideally, we choose locations that are equally distributed.
+                  By splitting the pixel into a grid containing the same number of boxes as the sampling rate, we have essentially split up the pixel into multiple pixels.
+                  We can sample the center of each box and determine whether each sample location is inside the triangle using our Point-in-Triangle test developed in the previous task.
+                  The result is outputted to the sample buffer in sequential order at location: [x*sample_rate + y*sample_rate*width + sample #] for averaging when we output to the frame buffer. <br />
+                  <h5>
+                      Frame Buffer: The frame buffer is the final place in our algorithm to send pixel data so that it can be rendered to the display.
+                      As such, its size is fixed and we can only write one RGB value per pixel.
+                  </h5>
+                  At the last step, when we output to the frame buffer, we must downsample by averaging the n samples per pixel that are in the sample buffer at locations: [x*sample_rate + y*sample_rate*width] - [x*sample_rate + y*sample_rate*width + sample_rate] so that we can provide a single approximated color to the frame buffer.
+                  <h4> Why is supersampling useful?</h4>
+                  Supersampling can allow for higher image quality at the cost of performance.
+                  We are able to sample at a higher frequency than the target resolution and downsample to obtain a more accurate image and remove aliasing artifacts.
+              </p>
+
+              <p> In the screenshots below, we can observe multiple sampled images of basic/test4.svg. As we increase the sampling rate per pixel, you can begin to see fewer artifacts.
+              This is the result of averaging the boxes within each pixel. 
+              Instead of coloring a pixel on the edge entirely or none at all, we can reach a point in the middle which is a lighter shade of the triangle's color.</p>
+              <div align="middle">
+                  <table style="width=100%">
+                      <tr>
+                          <td>
+                              <img src="images/image21.png" align="middle" width="500px" />
+                              <figcaption align="middle">basic/test4.svg at sample rate 1.</figcaption>
+                          </td>
+                          <td>
+                              <img src="images/image22.png" align="middle" width="500px" />
+                              <figcaption align="middle">basic/test4.svg at sample rate 4.</figcaption>
+                          </td>
+                      </tr>
+                      <tr>
+                          <td>
+                              <img src="images/image23.png" align="middle" width="500px" />
+                              <figcaption align="middle">basic/test4.svg at sample rate 16.</figcaption>
+                          </td>
+                      </tr>
+                  </table>
+              </div>
+
+              <h3 align="middle">Part 3: Transforms</h3>
 
 
 
-        <h3 align="middle">Part 3: Transforms</h3>
+              <h2 align="middle">Section II: Sampling</h2>
+
+              <h3 align="middle">Part 4: Barycentric coordinates</h3>
+
+
+              <h3 align="middle">Part 5: "Pixel sampling" for texture mapping</h3>
+
+
+              <h3 align="middle">Part 6: "Level sampling" with mipmaps for texture mapping</h3>
 
 
 
-        <h2 align="middle">Section II: Sampling</h2>
+              <h2 align="middle">Section III: Art Competition</h2>
+              <p>If you are not participating in the optional art competition, don't worry about this section!</p>
 
-        <h3 align="middle">Part 4: Barycentric coordinates</h3>
+              <h3 align="middle">Part 7: Draw something interesting!</h3>
 
-
-        <h3 align="middle">Part 5: "Pixel sampling" for texture mapping</h3>
-
-
-        <h3 align="middle">Part 6: "Level sampling" with mipmaps for texture mapping</h3>
-
-
-
-        <h2 align="middle">Section III: Art Competition</h2>
-        <p>If you are not participating in the optional art competition, don't worry about this section!</p>
-
-        <h3 align="middle">Part 7: Draw something interesting!</h3>
-
-    </div>
+          </div>
 
 </body>
 </html>
