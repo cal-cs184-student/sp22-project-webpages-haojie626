@@ -33,8 +33,12 @@
           <div>
 
               <h2 align="middle">Overview</h2>
-              <h1>TO DO</h1>
-              <p>Give a high-level overview of what you implemented in this project. Think about what you've built as a whole. Share your thoughts on what interesting things you've learned from completing the project.</p>
+              <p>
+                  In this project, I implemented rasterization of triangles as well as multiple different forms of antialiasing such as supersampling, bilinear filtering, and level sampling.
+                  I also learned how to transform polygons to create new shapes such as cubeman.
+                  I believe that these are the basic roots of computer graphics and techniques applied in this project such as linear interpolation has several uses.
+                  As I completed this project, I found that there are many ways to perform the same task using the same basic tools.
+              </p>
 
               <h2 align="middle">Section I: Rasterization</h2>
 
@@ -253,23 +257,102 @@
                   </table>
               </div>
               <h4>Observation</h4>
-              We can see a large difference between the two sampling methods most notably at 1 sample per pixel 
+              We can see a large difference between the two sampling methods most notably at 1 sample per pixel
               because this is when the nyquist frequency low enough where nearest sampling will generate graphical artifacts while bilinear sampling will not.
               Supersampling removes aliasing by increasing the sampling rate thus increasing the nyquist frequency
               whereas bilinear sampling removes the high frequencies above the nyquist frequency by creating a continuous function across the texel values.
               Even at 1 sample per pixel, bilinear sampling works extremely well because of the continuous function
               and we can see the difference in that the image using bilinear sampling is smoother.
+
+
               <h3 align="middle">Part 6: "Level sampling" with mipmaps for texture mapping</h3>
+              When there are more texels than pixels for a given map, this can cause our sampling to be inaccurate due to sampling between large amounts texels.
+              In order to combat this, we sample from downsampled versions of the texture image such that we are sampling from an image that has a similar amount of texels to our amount of pixels in the triangle.
+              <h4>
+                  Level sampling: Sampling at different mipmap levels based on distances of neighboring pixels in texture coordinates.
+              </h4>
+              By leveraging different levels of downsampling, we are able to reduce aliasing especially in the case of texture minification or shrinking the picture.
+              When we shrink the picture, we will eventually end up with more texels than pixels.
+              Now the question becomes how can we represent the color of all the texels that are closer to that pixel than other pixels?
+              Mipmaps are downsampled versions of the texture image that take the average of four texels and average them together.
+              We can obtain numerous mipmap levels by constantly halving the resolution of the texture image in both x and y dimensions.
+              By sampling at the correct mipmap level, we can obtain a color that is an accurate average of however many neighboring texels the pixel needs to represent.
+              The amount of texels each pixel needs to represent is calculated based on the maximum of the distance of the pixel from its top and right neighbor after being translated into texture coordinates at full resolution (mipmap level 0).
+              We can take the log of that distance to obtain the desired mipmap level.
 
+              <h4>
+                  Tradeoffs between Supersampling, Pixel Sampling, and Level Sampling
+              </h4>
+              Each method reduces aliasing in their own way to their own degree. These different implementations however, come at different performance costs and perform at different speeds.
+              <h5>Supersampling</h5>
+              <ul>
+                  <li>
+                      Speed: Supersampling at n times per pixel costs roughly n times the number of computation power. It is very slow when we are supersampling in high numbers such as 9x or 16x.
+                  </li>
+                  <li>
+                      Memory: Supersampling costs n times more memory because the sample buffer needs to be n times larger.
+                  </li>
+                  <li>
+                      Antialiasing power: Good antialiasing power at all resolutions.
+                  </li>
+              </ul>
+              <h5>Pixel Sampling</h5>
+              <ul>
+                  <li>
+                      Speed: Nearest sampling does not use much computation because it is only 1 texel read.
+                      Bilinear filtering however, takes 4 texel reads and 3 linear interpolation calculations thus making it slower than nearest sampling.
+                  </li>
+                  <li>
+                      Memory: little to no extra memory required.
+                  </li>
+                  <li>
+                      Antialiasing power: Bilinear filtering produces a decently good approximation of the texture.
+                  </li>
+              </ul>
+              <h5>Level Sampling</h5>
+              <ul>
+                  <li>
+                      Speed: Fairly fast due to precomputation and storage of mipmaps.
+                  </li>
+                  <li>
+                      Memory: Level sampling uses 33% extra memory
+                  </li>
+                  <li>
+                      Antialiasing power: Level sampling at nearest mipmap level still produces a few artifacts due to sudden switching between mipmap levels.
+                      This can be improved upon by using linear interpolation of adjacent mipmap levels.
+                      Level sampling does well in most cases.
+                      However, mipmaps have limitations such as overblur when we reach really low resolution mipmaps.
+                  </li>
+              </ul>
 
+              <div align="middle">
+                  <table style="width=100%">
+                      <tr>
+                          <td>
+                              <img src="images/image61.png" align="middle" width="500px" />
+                              <figcaption align="middle">Zero level sampling and Nearest pixel sampling.</figcaption>
+                          </td>
+                          <td>
+                              <img src="images/image62.png" align="middle" width="500px" />
+                              <figcaption align="middle">Zero level sampling and Bilinear pixel sampling.</figcaption>
+                          </td>
+                      </tr>
+                      <tr>
+                          <td>
+                              <img src="images/image63.png" align="middle" width="500px" />
+                              <figcaption align="middle">Nearest level sampling and Nearest pixel sampling.</figcaption>
+                          </td>
+                          <td>
+                              <img src="images/image64.png" align="middle" width="500px" />
+                              <figcaption align="middle">Nearest level sampling and Bilinear pixel sampling.</figcaption>
+                          </td>
+                      </tr>
+                  </table>
+              </div>
 
-              <h2 align="middle">Section III: Art Competition</h2>
-              <p>If you are not participating in the optional art competition, don't worry about this section!</p>
-
-              <h3 align="middle">Part 7: Draw something interesting!</h3>
-
-
-              <h4>Website hosted at: https://cal-cs184-student.github.io/sp22-project-webpages-haojie626/proj1/index.html</h4>
+              <h4>
+                  Website hosted at: https://cal-cs184-student.github.io/sp22-project-webpages-haojie626/proj1/index.html 
+              </h4>
           </div>
 
 </body>
