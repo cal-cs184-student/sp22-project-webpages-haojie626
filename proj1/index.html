@@ -188,7 +188,7 @@
                   The vertex values can be anything such as colors, coordinates, and vectors.
                   When applied to colors, barycentric coordinates produce a weighted "blend" of the three colors.
                   <br /> <br />
-                  Take a look at the image blow. Each vertex is colored red, green, or blue. Between each vertex however, we can leverage barycentric coordinates to produce a blended color.
+                  Take a look at the image below. Each vertex is colored red, green, or blue. Between each vertex however, we can leverage barycentric coordinates to produce a blended color.
               </p>
 
               <div align="middle">
@@ -209,8 +209,56 @@
               </div>
 
               <h3 align="middle">Part 5: "Pixel sampling" for texture mapping</h3>
-
-
+              <h4>
+                  Pixel sampling is when we sample a texture for its color at a given texture coordinate that maps to a specific pixel coordinate on the screen.
+              </h4>
+              To implement texture mapping on each triangle, we must obtain the coordinates of each vertex in terms of pixel location and corresponding texture location.
+              Within the triangle, each pixel location corresponds to a specific texture location and we can obtain the texture location for any given pixel using barycentric coordinates.
+              After obtaining the texture location (u,v), we can begin sampling from the texture.
+              However, we can only sample from the texture at fixed texture locations(texels). As such, we have two pixel sampling methods: nearest and bilinear. <br /><br />
+              <ul>
+                  <li>
+                      Nearest is simple, it samples the closest texture value from our texture location (u,v).
+                  </li>
+                  <li>
+                      Bilinear uses linear interpolation to calculate a weighted value using proportional distances from the four closest texture values that are near our texture location (u,v).
+                      Bilinear sampling produces a more accurate color for our texture location than nearest sampling.
+                  </li>
+              </ul>
+              <h4>
+                  Here are four images using nearest sampling and bilinear sampling at 1 sample per pixel and 16 samples per pixel.
+              </h4>
+              <div align="middle">
+                  <table style="width=100%">
+                      <tr>
+                          <td>
+                              <img src="images/image51.png" align="middle" width="400px" />
+                              <figcaption align="middle">Nearest sampling at 1 sample per pixel.</figcaption>
+                          </td>
+                          <td>
+                              <img src="images/image52.png" align="middle" width="400px" />
+                              <figcaption align="middle">Nearest sampling at 16 samples per pixel.</figcaption>
+                          </td>
+                      </tr>
+                      <tr>
+                          <td>
+                              <img src="images/image53.png" align="middle" width="400px" />
+                              <figcaption align="middle">Bilinear sampling at 1 sample per pixel.</figcaption>
+                          </td>
+                          <td>
+                              <img src="images/image54.png" align="middle" width="400px" />
+                              <figcaption align="middle">BIlinear sampling at 16 samples per pixel.</figcaption>
+                          </td>
+                      </tr>
+                  </table>
+              </div>
+              <h4>Observation</h4>
+              We can see a large difference between the two sampling methods most notably at 1 sample per pixel 
+              because this is when the nyquist frequency low enough where nearest sampling will generate graphical artifacts while bilinear sampling will not.
+              Supersampling removes aliasing by increasing the sampling rate thus increasing the nyquist frequency
+              whereas bilinear sampling removes the high frequencies above the nyquist frequency by creating a continuous function across the texel values.
+              Even at 1 sample per pixel, bilinear sampling works extremely well because of the continuous function
+              and we can see the difference in that the image using bilinear sampling is smoother.
               <h3 align="middle">Part 6: "Level sampling" with mipmaps for texture mapping</h3>
 
 
@@ -220,6 +268,8 @@
 
               <h3 align="middle">Part 7: Draw something interesting!</h3>
 
+
+              <h4>Website hosted at: https://cal-cs184-student.github.io/sp22-project-webpages-haojie626/proj1/index.html</h4>
           </div>
 
 </body>
