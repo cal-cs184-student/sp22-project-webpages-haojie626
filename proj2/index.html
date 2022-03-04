@@ -169,6 +169,9 @@
                   These vectors are then summed and normalized, giving us a vertex normal that is weighted by each surrounding face's area.
               </p>
 
+              <h4>
+                  Example
+              </h4>
               <p>
                   Here, we can see a teapot shaded with and without vertex normals.
               </p>
@@ -189,7 +192,39 @@
               </div>
               <!--------------------------------------------- PART 4 ----------------------------------------------->
               <h3 align="middle">Part 4: Half-edge flip</h3>
+              In order to implement the edge flip operation, we must obtain the target edge and all the vertices, half-edges, and faces that are involved in the flip.
+              Since the half-edge data structure allows us to easily traverse the mesh, we can quickly obtain references for all of the elements above.
+              The half-edge data structure also implies that the mesh is connected primarily through half-edges.<br /> <br />
 
+              First, we want to properly set the half-edge pointer of each vertex, edge, and face to a possibly different half-edge that it now corresponds to.
+              Most notably, this is when a vertex becomes an endpoint for the newly flipped edge.
+              Then, we want to fix the half-edges so that they point to the (possibly) new next half-edge, twin, vertex, edge, and face.
+              This is particularly true for half-edges belonging to the flipped edge. <br /> <br />
+
+              Since we are only implementing edge flipping in this part, many of the updates are not needed as we do not add/remove elements.
+              Throughout the task, I found that roughly half of the elements did not require much updating.
+              Fortunately, I only ran into one bug which was due to a typo so I did not need to go on a debugging adventure
+              <h4>
+                  Example
+              </h4>
+              <p>
+                  Here, we can see a teapot before and after with edge flipping.
+              </p>
+
+              <div align="middle">
+                  <table style="width=100%">
+                      <tr>
+                          <td>
+                              <img src="images/image41.png" align="middle" width="500px" />
+                              <figcaption align="middle">Teapot without edge flipping</figcaption>
+                          </td>
+                          <td>
+                              <img src="images/image42.png" align="middle" width="500px" />
+                              <figcaption align="middle">Teapot with edge flipping</figcaption>
+                          </td>
+                      </tr>
+                  </table>
+              </div>
               <!--------------------------------------------- PART 5 ----------------------------------------------->
               <h3 align="middle">Part 5: Half-edge split</h3>
 
@@ -197,11 +232,6 @@
               <h3 align="middle">Part 6: Loop subdivision for mesh upsampling</h3>
 
 
-
-              <h2 align="middle">Section III: Optional Extra Credit</h2>
-              <p>If you are not participating in the optional mesh competition, don't worry about this section!</p>
-
-              <h3 align="middle">Part 7: Design your own mesh!</h3>
               <h3>
                   The project writeup is hosted at: https://cal-cs184-student.github.io/sp22-project-webpages-haojie626/proj2/index.html
               </h3>
