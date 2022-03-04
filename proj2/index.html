@@ -134,7 +134,6 @@
                   then we have a new set of m control points that we can apply de Casteljau's algorithm to.
                   If we apply de Casteljau's algorithm over values v between 0.0 and 1.0 to the m points obtained from the original 1D curves for each value u,
                   we obtain a Bezier surface. <br /><br />
-
               </p>
               <h4>
                   Example
@@ -148,7 +147,7 @@
                       <tr>
                           <td>
                               <img src="images/image21.png" align="middle" width="600px" />
-                              <figcaption align="middle">Teapot generated using de Castejau's Algorithm'</figcaption>
+                              <figcaption align="middle">Teapot generated using de Castejau's Algorithm</figcaption>
                           </td>
                       </tr>
                   </table>
@@ -156,13 +155,38 @@
 
 
 
-
-
               <h2 align="middle">Section II: Sampling</h2>
 
               <!--------------------------------------------- PART 3 ----------------------------------------------->
               <h3 align="middle">Part 3: Average normals for half-edge meshes</h3>
+              <p>
+                  As mentioned in lecture, per-vertex normal vectors are important for shading at the vertex and pixel frequency levels.
+                  One way to generate such vectors without knowing the underlying geometry is by inferring it through the normals of the surrounding faces (the faces that contain the vertex). <br /> <br />
 
+                  For each vertex, I created the area-weighted vertex normal by traversing through every surrounding face using the half-edge data structure
+                  and computing the area and normal vectors for each face by taking the cross product of (v2-v1, v3-v1) with v1, v2, v3 being the corresponding vertices
+                  to get the normal and dividing the magnitude of the normal by 2 to get the area.
+                  These vectors are then summed and normalized, giving us a vertex normal that is weighted by each surrounding face's area.
+              </p>
+
+              <p>
+                  Here, we can see a teapot shaded with and without vertex normals.
+              </p>
+
+              <div align="middle">
+                  <table style="width=100%">
+                      <tr>
+                          <td>
+                              <img src="images/image31.png" align="middle" width="500px" />
+                              <figcaption align="middle">Teapot without vertex normals (Flat Shading)</figcaption>
+                          </td>
+                          <td>
+                              <img src="images/image32.png" align="middle" width="500px" />
+                              <figcaption align="middle">Teapot with vertex normals (Phong Shading)</figcaption>
+                          </td>
+                      </tr>
+                  </table>
+              </div>
               <!--------------------------------------------- PART 4 ----------------------------------------------->
               <h3 align="middle">Part 4: Half-edge flip</h3>
 
@@ -178,7 +202,9 @@
               <p>If you are not participating in the optional mesh competition, don't worry about this section!</p>
 
               <h3 align="middle">Part 7: Design your own mesh!</h3>
-
+              <h3>
+                  The project writeup is hosted at: https://cal-cs184-student.github.io/sp22-project-webpages-haojie626/proj2/index.html
+              </h3>
           </div>
 
 </body>
