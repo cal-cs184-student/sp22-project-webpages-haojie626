@@ -227,6 +227,50 @@
               </div>
               <!--------------------------------------------- PART 5 ----------------------------------------------->
               <h3 align="middle">Part 5: Half-edge split</h3>
+              <p>
+                  In order to perform an edge split, we first obtain references to the original relevant vertices, faces, edges, and half-edges.
+                  In addition to the current references, we must also create a new vertex, two new faces, three new edges, and six new half-edges.
+                  The reason we only need to create three new edges instead of four is because the original edge does not need to be deleted and we can simply "shrink" it to be our fourth edge.
+                  These new elements are combined with the original elements to give us a total of four faces, four edges, five vertices, and twelve half-edges to update. <br /><br />
+
+                  We can now procedurally update each element similarly to part 4. For the faces, edges, and vertices, we properly set their half-edge pointers.
+                  For the half-edges, we properly set their next, twin, vertex, edge, and face pointers.
+                  Note that in an edge split, there will be more significant updates to original elements since many elements such as half-edges will correspond to new next half-edges, faces, etc. <br /><br />
+
+                  During implementation, I fortunately did not need to go on any debugging journeys as keeping the code clean and organized allowed me to keep good track of pointers during reassignments.
+                  Boundary edges are also not supported.
+
+              </p>
+              <h4>
+                  Example
+              </h4>
+              <p>
+                  Teapot before and after edge splits/flips
+              </p>
+              <div align="middle">
+                  <table style="width=100%">
+                      <tr>
+                          <td>
+                              <img src="images/image51.png" align="middle" width="500px" />
+                              <figcaption align="middle">Teapot</figcaption>
+                          </td>
+                          <td>
+                              <img src="images/image52.png" align="middle" width="500px" />
+                              <figcaption align="middle">Teapot with edge splits</figcaption>
+                          </td>
+                      </tr>
+                      <tr>
+                          <td>
+                              <img src="images/image53.png" align="middle" width="500px" />
+                              <figcaption align="middle">Teapot with edge flips</figcaption>
+                          </td>
+                          <td>
+                              <img src="images/image54.png" align="middle" width="500px" />
+                              <figcaption align="middle">Teapot with edge flips and splits</figcaption>
+                          </td>
+                      </tr>
+                  </table>
+              </div>
 
               <!--------------------------------------------- PART 6 ----------------------------------------------->
               <h3 align="middle">Part 6: Loop subdivision for mesh upsampling</h3>
