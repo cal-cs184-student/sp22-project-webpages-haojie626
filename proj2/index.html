@@ -274,7 +274,125 @@
 
               <!--------------------------------------------- PART 6 ----------------------------------------------->
               <h3 align="middle">Part 6: Loop subdivision for mesh upsampling</h3>
+              <p>
+                  Loop subdivision is a method used to upscale a polygon mesh, that is, to increase the number of polygons by subdividing each triangle.
+                  In our case, perform a 4-1 subdivision which splits each original triangle into four smaller triangles.<br /><br />
 
+                  The procedure for loop subdivision differs from implementation and is summarized as follows.
+                  First, for each triangle, we create three vertices at each edge's midpoint and connect them to each other.
+                  Then, we update each vertex (including the new vertices) to a weighted average of neighboring vertices following using specific weights. <br /><br />
+
+                  <h4>
+                      Implementation
+                  </h4>
+                  In implementation however, we first compute the position of each vertex and store it in a newPosition variable.
+                  The reason for this is because traversing the mesh to obtain the position of the neighboring vertices is easier if we traverse before performing subdivision.
+                  For original vertices, we traverse using the half-edges to reach all neighboring vertices and sum each position by a specific weight, including its own original position.
+                  For new vertices, we traverse using the half-edge of the edge that is going to form the vertex.
+                  However, the new vertex does not yet exist so we store it's precomputed position in the edge that is soon to be split.
+                  After division, we can copy the newPosition stored in the edge into the newPosition of the newly formed vertex. <br /><br />
+
+                  At this point, all vertices new and old have precomputed positions stored in a newPosition variable.
+                  We then split each edge in random order to create 3 new edges per original face.
+                  Since the order is random, these new edges may not be connected to the correct vertices which are the newly created vertices.
+                  We keep track of the newly created vertices by marking isNew during edge splitting and can simply flip each new edge if it does not connect between two new vertices.
+                  There is an exception for the two edges created that are along the original edge where we do not flip them regardless. <br /><br />
+
+                  Finally, we update the position of all vertices by copying the newPosition over to their real position variables.
+
+              </p>
+
+              <h4>
+                  Notes
+              </h4>
+
+              <p>
+                  When subdividing sharp edges, the updating of vertex positions and increase in polygons "smooths" the edge.
+                  However, we can reduce this effect by pre-splitting edges near/along the corner and edge so that when we subdivide, the updating of vertex positions is less drastic.
+                  This gives allows us to maintain a more defined edge.
+              </p>
+              <p>
+                  Cube after two subdivision iterations with/without pre-splitting edges along sharp corners
+              </p>
+              <div align="middle">
+                  <table style="width=100%">
+                      <tr>
+                          <td>
+                              <img src="images/image61.png" align="middle" width="500px" />
+                              <figcaption align="middle">Cube after 2 iterations without pre-splitting edges</figcaption>
+                          </td>
+                          <td>
+                              <img src="images/image62.png" align="middle" width="500px" />
+                              <figcaption align="middle">Cube after 2 iterations with pre-splitting edges</figcaption>
+                          </td>
+                      </tr>
+                  </table>
+              </div>
+
+              <p>
+                  When we subdivide a cube that has an assymetric polygon mesh, we obtain an assymetric resulting mesh.
+                  The solution here is to pre-process the cube such that the polygon mesh is symmetrical and reducing the amount of extraordinary points (vertex degree != 6).
+                  These effects occur because subdivision strongly depends on the degree of vertices to create a continuous surface.
+                  If a vertex has a degree not equal to 6, it will subdivide and will only be C1 continous and not C2 continous at that position.
+              </p>
+              <p>
+                  Cube after two subdivision iterations with/without pre-processing
+              </p>
+              <div align="middle">
+                  <table style="width=100%">
+                      <tr>
+                          <td>
+                              <img src="images/image63.png" align="middle" width="500px" />
+                              <figcaption align="middle">Cube without pre-processing</figcaption>
+                          </td>
+                          <td>
+                              <img src="images/image64.png" align="middle" width="500px" />
+                              <figcaption align="middle">Cube after 2 iterations without pre-processing</figcaption>
+                          </td>
+                      </tr>
+                      <tr>
+                          <td>
+                              <img src="images/image65.png" align="middle" width="500px" />
+                              <figcaption align="middle">Cube with pre-processing</figcaption>
+                          </td>
+                          <td>
+                              <img src="images/image66.png" align="middle" width="500px" />
+                              <figcaption align="middle">Cube after 2 iterations with pre-processing</figcaption>
+                          </td>
+                      </tr>
+                  </table>
+              </div>
+
+              <h4>
+                  Bonus
+              </h4>
+              <p>
+                  Cow before and after subdivisions!
+              </p>
+              <div align="middle">
+                  <table style="width=100%">
+                      <tr>
+                          <td>
+                              <img src="images/image71.png" align="middle" width="500px" />
+                              <figcaption align="middle">Rough Cow</figcaption>
+                          </td>
+                          <td>
+                              <img src="images/image72.png" align="middle" width="500px" />
+                              <figcaption align="middle">s-Moo-th Cow (1 loop subdivision)</figcaption>
+                          </td>
+                      </tr>
+                      <tr>
+                          <td>
+                              <img src="images/image73.png" align="middle" width="500px" />
+                              <figcaption align="middle">Even s-Moo-ther Cow (2 loop subdivisions)</figcaption>
+                          </td>
+                          <td>
+                              <img src="images/image74.png" align="middle" width="500px" />
+                              <figcaption align="middle">s-Moo-thest Cow (3 loop subdivisions)</figcaption>
+                          </td>
+                      </tr>
+                  </table>
+              </div>
 
               <h3>
                   The project writeup is hosted at: https://cal-cs184-student.github.io/sp22-project-webpages-haojie626/proj2/index.html
