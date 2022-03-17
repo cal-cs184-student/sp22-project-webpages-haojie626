@@ -1,7 +1,94 @@
-<html>
-	<head>
-	</head>
-	<body>
-		Project 3-1 here
-	</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<style>  
+    div.padded {  
+      padding-top: 0px;  
+      padding-right: 100px;  
+      padding-bottom: 0.25in;  
+      padding-left: 100px;  
+    }  
+  </style> 
+<title>Hao Jie Zhou  |  CS 184</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="style.css" media="screen" />
+</head>
+<body>
+<br />
+<h1 align="middle">Assignment 3: PathTracer</h1>
+    <h2 align="middle">Hao Jie Zhou</h2>
+
+    <div class="padded">
+        <p>Use this section to write an overview of the assignment. All of the text in your write-up should be <em>in your own words</em>. If you need to add additional HTML features to this document, you can search the <a href="http://www.w3schools.com/">http://www.w3schools.com/</a> website for instructions. To edit the HTML, you can just copy and paste existing chunks and fill in the text and image file names appropriately.</p>
+        <o>
+            The website writeup is intended to be a self-contained walkthrough of the assignment: we want this to be a piece of work which showcases your understanding of relevant concepts through both mesh images as well as written explanations about what you did to complete each part of the assignment. Try to be as clear and organized as possible when writing about your own output files or extensions to the assignment. We want to understand what you've achieved and how you've done it!</p>
+            <p>If you are well-versed in web development, feel free to ditch this template and make a better looking page. Just make sure that you include all the components as we've laid them out here. </p>
+
+            <h2 align="middle">Part 1: Ray Generation and Intersection</h2>
+            <p>
+                In Part 1, we start with the basics of ray generation and intersection of triangles and spheres, both of which are primitives.
+                In basic ray tracing, each pixel of an image is colored by casting a ray through it and collecting the radiance along the path of the ray, particularly when it intersects with an object.
+            </p>
+            <h3>
+                Ray Generation
+            </h3>
+            <p>
+                First, we need to generate the ray for each respective pixel. A ray consists of an origin, a direction vector, and other data such as tmax and tmin.
+                Given an image coordinate (x,y), we first transform the coordinate from 2-dimensional image space to 3-dimensional camera space. Here is how to do it.
+                The image coordinate provided is normalized, so we need to perform a translation to center it along our new z axis. Then, we scale it to our virtual camera sensor size
+                before finally shifting the image plane to z=-1. Subtracting the new image coordinate from the origin gives us the direction vector for the ray in camera space.
+                Lastly, we want to transform the ray (direction vector) into world space and normalize the direction vector.
+            </p>
+            <h3>
+                Triangle and Sphere Intersection
+            </h3>
+            <p>
+                The two types of primitives that we want to test ray intersection on are triangles and spheres. Triangle intersection is implemented using the Moller Trumbore Algorithm.
+                The algorithm takes three vertex positions and a ray as inputs and outputs the t value where the ray passes the triangle plane and two of the three barycentric coordinates.
+                We can obtain the third barycentric coordinate by subtracting the two barycentric coordinates from 1.
+                Now, if t is within our ray's tmax and tmin and all three barycentric coordinates show that the ray passes through somewhere inside the triangle, then we have a valid intersection.
+                Ray intersection on a sphere on the other hand, is calculated using the standard sphere formula and calculating the t value for when the ray intersects the sphere using the quadratic formula.
+                We can have three outcomes for ray-sphere intersections: the ray intersects at no points, the ray intersects at one point, and the ray intersects at two points.
+                In the normal case, a ray usually enters a sphere at one point and exits a sphere at another point, both of which count as intersections.
+                However, we want the one closer to our origin that is within tmax and tmin.
+                If any intersection is valid, we use the surface normal and surface material to determine what color the ray should see.
+            </p>
+
+            <div align="center">
+                <table style="width=100%">
+                    <tr>
+                        <td align="middle">
+                            <img src="images/image11.png" width="480px" />
+                            <figcaption align="middle">Basic ray tracing on spheres in a room</figcaption>
+                        </td>
+                        <td align="middle">
+                            <img src="images/image12.png" width="480px" />
+                            <figcaption align="middle">Basic ray tracing on a coil in a room</figcaption>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="middle">
+                            <img src="images/image13.png" width="480px" />
+                            <figcaption align="middle">Basic ray tracing on gems in a room</figcaption>
+                        </td>
+                        <td align="middle">
+                            <img src="images/image14.png" width="480px" />
+                            <figcaption align="middle">Basic ray tracing on a banana</figcaption>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <h2 align="middle">Part 2: Bounding Volume Hierarchy</h2>
+            
+            <h2 align="middle">
+                You can also find the writeup hosted here: https://cal-cs184-student.github.io/sp22-project-webpages-haojie626/proj3-1/index.html
+
+            </h2>
+        </o></div>
+</body>
 </html>
+
+
+
+
