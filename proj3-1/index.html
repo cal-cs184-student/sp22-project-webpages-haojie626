@@ -1,21 +1,21 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-<style>  
-    div.padded {  
-      padding-top: 0px;  
-      padding-right: 100px;  
-      padding-bottom: 0.25in;  
-      padding-left: 100px;  
-    }  
-  </style> 
-<title>Hao Jie Zhou  |  CS 184</title>
-<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-<link rel="stylesheet" type="text/css" href="style.css" media="screen" />
+    <style>
+        div.padded {
+            padding-top: 0px;
+            padding-right: 100px;
+            padding-bottom: 0.25in;
+            padding-left: 100px;
+        }
+    </style>
+    <title>Hao Jie Zhou  |  CS 184</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" type="text/css" href="style.css" media="screen" />
 </head>
 <body>
-<br />
-<h1 align="middle">Assignment 3: PathTracer</h1>
+    <br />
+    <h1 align="middle">Assignment 3: PathTracer</h1>
     <h2 align="middle">Hao Jie Zhou</h2>
 
     <div class="padded">
@@ -37,7 +37,7 @@
                 Given an image coordinate (x,y), we first transform the coordinate from 2-dimensional image space to 3-dimensional camera space. Here is how to do it.
                 The image coordinate provided is normalized, so we need to perform a translation to center it along our new z axis. Then, we scale it to our virtual camera sensor size
                 before finally shifting the image plane to z=-1. Subtracting the new image coordinate from the origin gives us the direction vector for the ray in camera space.
-                Lastly, we want to transform the ray (direction vector) into world space and normalize the direction vector.
+                Lastly, we want to transform the direction vector into world space and normalize it. The origin of the ray should also be transformed into world space if it is not already.
             </p>
             <h3>
                 Triangle and Sphere Intersection
@@ -46,7 +46,7 @@
                 The two types of primitives that we want to test ray intersection on are triangles and spheres. Triangle intersection is implemented using the Moller Trumbore Algorithm.
                 The algorithm takes three vertex positions and a ray as inputs and outputs the t value where the ray passes the triangle plane and two of the three barycentric coordinates.
                 We can obtain the third barycentric coordinate by subtracting the two barycentric coordinates from 1.
-                Now, if t is within our ray's tmax and tmin and all three barycentric coordinates show that the ray passes through somewhere inside the triangle, then we have a valid intersection.
+                Now, if t is within our ray's tmax and tmin and all three barycentric coordinates show that the ray passes through somewhere inside the triangle (they must all be within [0,1]), then we have a valid intersection.
                 Ray intersection on a sphere on the other hand, is calculated using the standard sphere formula and calculating the t value for when the ray intersects the sphere using the quadratic formula.
                 We can have three outcomes for ray-sphere intersections: the ray intersects at no points, the ray intersects at one point, and the ray intersects at two points.
                 In the normal case, a ray usually enters a sphere at one point and exits a sphere at another point, both of which count as intersections.
@@ -80,12 +80,104 @@
             </div>
 
             <h2 align="middle">Part 2: Bounding Volume Hierarchy</h2>
-            
+            <p>
+                In this part, we significantly increased rendering speed by only considering intersection tests on primitives that are somewhat close to the path of the ray.
+                Instead of testing each object per pixel, we can narrow this down to the log(# of objects) by using a decent partitioning algorithm to group objects.
+                In essence, we construct a hierarchy of "bounding boxes" around groups of objects such that if our ray does not intersect with a bounding box,
+                we can skip all the primitives inside the box, saving lots of computation.
+                If our ray does intersect with the bounding box, we can traverse down the hierarchy to test each of the child bounding boxes.
+                Eventually we may reach a few leaf bounding boxes and we can test the primitives within those boxes for intersection.
+            </p>
+            <h3>
+                BVH Algorithm
+            </h3>
+            <p>
+                The algorithm requires preprocessing of primitives to create a binary tree containing a hierarchy of BVH structures.
+                Recursion is used to construct two child nodes from each parent node until the child node reaches below the maximum number of primitives to qualify as a leaf
+                (in which we can return the node with a small range of primitives).
+                For each node starting at the root node (which contains all the primitives),
+                the longest axis is computed by iterating through every primitive within the node as well as the average centroid of every primitive's bounding box.
+                The parent node is constructed first, setting the bounding box by expanding through every primitive provided and then we can begin partitioning the primitives into a left and right partition.
+                The primitives are partitioned based on which side they lie compared to the average centroid's position on the longest axis.
+                This is a fairly good way to partition as it gives us a fairly even amount of primitives for the left and right child nodes as well as reduces the size of the child bounding box significantly.
+                We recursively perform the procedure on the child nodes until we end up with every primitive being in a leaf node.
+                After the setup, the algorithm tests each node starting from the root if it intersects the box. If it intersects the box, we then check if it intersects with each child.
+                This procedure happens recursively until we possibly reach leaf nodes that the ray intersects. At that point, we can test the primitives in each leaf node that we've reached.
+                Computation is saved because for each ray, we do not test for intersection on the majority of primitives, only their bounding boxes.
+                If the ray does not intersect a bounding box, all the child boxes and primitives do not need to be tested.
+            </p>
+            <div align="center">
+                <table style="width=100%">
+                    <tr>
+                        <td align="middle">
+                            <img src="images/image21.png" width="480px" />
+                            <figcaption align="middle">BVH-accelerated ray tracing on maxplanck</figcaption>
+                        </td>
+                        <td align="middle">
+                            <img src="images/image22.png" width="480px" />
+                            <figcaption align="middle">BVH-accelerated ray tracing on a bunny</figcaption>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="middle">
+                            <img src="images/image23.png" width="480px" />
+                            <figcaption align="middle">BVH-accelerated ray tracing on a dragon</figcaption>
+                        </td>
+                        <td align="middle">
+                            <img src="images/image24.png" width="480px" />
+                            <figcaption align="middle">BVH-accelerated ray tracing on lucy</figcaption>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <h3>
+                Performance Analysis
+            </h3>
+            <p>
+                We can compare the rendering times for three scenes with increasing complexity in geometry.
+                As you can see in the images below, we observe a phenomenal speedup in computation times on even the the most complex scenes.
+                Maxplanck, which took 70 seconds without BVH acceleration, only took 0.02 seconds with BVH acceleration.
+                The cow and banana both also had speedups but were less drastic as they were already somewhat fast.
+                It is important to observe that the partitioning algorithm has a significant impact on the speedup factor.
+                If we partitioned primitives in some arbitrary way, there would be a negligible performance boost because the children bounding boxes would be almost as big as the parent's.
+                The speedup is best when a ray ideally only intersects one of the child nodes and each child node contains an equal amount of primitives, essentially halving the number of primitives at each level.
+            </p>
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                        <img src="images/image25.png" width="500px" />
+                        <figcaption align="middle">Naive ray tracing on banana</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/image26.png" width="500px" />
+                        <figcaption align="middle">Naive ray tracing on cow</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/image27.png" width="500px" />
+                        <figcaption align="middle">Naive ray tracing on maxplanck</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="images/image28.png" width="500px" />
+                        <figcaption align="middle">BVH-accelerated ray tracing on banana</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/image29.png" width="500px" />
+                        <figcaption align="middle">BVH-accelerated ray tracing on cow</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/image210.png" width="500px" />
+                        <figcaption align="middle">BVH-accelerated ray tracing on maxplanck</figcaption>
+                    </td>
+                </tr>
+            </table>
             <h2 align="middle">
                 You can also find the writeup hosted here: https://cal-cs184-student.github.io/sp22-project-webpages-haojie626/proj3-1/index.html
 
             </h2>
-        </o></div>
+        </o>
+    </div>
 </body>
 </html>
 
