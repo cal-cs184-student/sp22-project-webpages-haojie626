@@ -19,11 +19,18 @@
     <h2 align="middle">Hao Jie Zhou</h2>
 
     <div class="padded">
-        <p>Use this section to write an overview of the assignment. All of the text in your write-up should be <em>in your own words</em>. If you need to add additional HTML features to this document, you can search the <a href="http://www.w3schools.com/">http://www.w3schools.com/</a> website for instructions. To edit the HTML, you can just copy and paste existing chunks and fill in the text and image file names appropriately.</p>
+        <h2>
+            Overview
+        </h2>
+        <p>
+            In this project, I implemented the basics of ray tracing including ray generation, primitive intersection, and BVH geometric acceleration structures. 
+            Ray tracing is a physics-based method of producing realistic images by simulating the way light interacts with objects and materials in 3D space before traveling towards the viewer. 
+            By generating camera rays and sending it into the world through each pixel, we can test for intersections along the ray and determine how the pixel would look based on the object's properties
+            if an intersection were to occur.
+            Ray tracing is also sped up using BVH which reduces the amount of objects we test significantly.
+            Unfortunately however, I was unable to complete parts 3, 4, and 5 due to personal time difficulties.
+        </p>
         <o>
-            The website writeup is intended to be a self-contained walkthrough of the assignment: we want this to be a piece of work which showcases your understanding of relevant concepts through both mesh images as well as written explanations about what you did to complete each part of the assignment. Try to be as clear and organized as possible when writing about your own output files or extensions to the assignment. We want to understand what you've achieved and how you've done it!</p>
-            <p>If you are well-versed in web development, feel free to ditch this template and make a better looking page. Just make sure that you include all the components as we've laid them out here. </p>
-
             <h2 align="middle">Part 1: Ray Generation and Intersection</h2>
             <p>
                 In Part 1, we start with the basics of ray generation and intersection of triangles and spheres, both of which are primitives.
@@ -82,7 +89,7 @@
             <h2 align="middle">Part 2: Bounding Volume Hierarchy</h2>
             <p>
                 In this part, we significantly increased rendering speed by only considering intersection tests on primitives that are somewhat close to the path of the ray.
-                Instead of testing each object per pixel, we can narrow this down to the log(# of objects) by using a decent partitioning algorithm to group objects.
+                Instead of testing every object per pixel, we can narrow this down to the log(# of objects) by using a decent partitioning algorithm to group objects.
                 In essence, we construct a hierarchy of "bounding boxes" around groups of objects such that if our ray does not intersect with a bounding box,
                 we can skip all the primitives inside the box, saving lots of computation.
                 If our ray does intersect with the bounding box, we can traverse down the hierarchy to test each of the child bounding boxes.
@@ -139,7 +146,8 @@
                 Maxplanck, which took 70 seconds without BVH acceleration, only took 0.02 seconds with BVH acceleration.
                 The cow and banana both also had speedups but were less drastic as they were already somewhat fast.
                 It is important to observe that the partitioning algorithm has a significant impact on the speedup factor.
-                If we partitioned primitives in some arbitrary way, there would be a negligible performance boost because the children bounding boxes would be almost as big as the parent's.
+                If we partitioned primitives in some arbitrary way, there would be a negligible performance boost because both of the children bounding boxes would be almost as big as the parent's.
+                This would cause us to likely test both children so our binary tree becomes ineffective.
                 The speedup is best when a ray ideally only intersects one of the child nodes and each child node contains an equal amount of primitives, essentially halving the number of primitives at each level.
             </p>
             <table style="width=100%">
