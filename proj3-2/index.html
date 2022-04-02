@@ -1,7 +1,139 @@
-<html>
-	<head>
-	</head>
-	<body>
-		Project 3-2 here
-	</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<style>  
+    div.padded {  
+      padding-top: 0px;  
+      padding-right: 100px;  
+      padding-bottom: 0.25in;  
+      padding-left: 100px;  
+    }  
+  </style> 
+<title>Hao Jie Zhou  |  CS 184</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="style.css" media="screen" />
+</head>
+<body>
+<br />
+<h1 align="middle">Assignment 3: PathTracer</h1>
+    <h2 align="middle">Hao Jie Zhou</h2>
+
+    <div class="padded">
+    <h2 align="middle">Project Overview</h2>
+        WRITE OVERVIEW HERE
+    <h2 align="middle">Part 1: Mirror and Glass Materials</h2>
+        <p>In the first part of this project, we implemented reflection and refraction functions so that we can model more advanced types of materials. 
+            Particularly, these reflection and refraction functions are necessary for simulation of shiny and transparent objects.
+            </p>
+        <h4>Reflection</h4>
+        <p>In the reflection function of our BSDF, we are given a vector representing the ray of light reflecting off of a surface and we want to compute the vector representing 
+            the mirroring solid angle that the ray hits the surface at. This angle is important because we can use it to recursively compute the light coming from that direction (from the next object).
+            This is the perfect specular reflection equation used in my implementation: 
+        </p>
+
+            <p align="middle"><pre align="middle">wi = -wo + 2 * dot(wo, norm) * norm</pre></p>
+        <p>
+            What you will notice is that we can swap wi and wo, as the lecture slide computes wo from wi instead. This is because theta(i) is equal to theta(o). 
+            In other words, they have the same angle from the normal vector.
+        </p>
+        <h4>Refraction</h4>
+            <p>
+            In the refraction function of our BSDF, we use Snell's law to compute the refraction direction of a given vector. 
+            This takes into account the index of refraction of the two mediums to compute the entering/exiting angle. 
+            </p>
+            <p align="middle"><pre align="middle">eta_i*sin(theta_i) = eta_t*sin(theta_t)</pre></p>
+
+            <p>
+            From the Snell's law, we can derive the x, y, and z of the wi vector using functions in the spec that transform wo.
+            We also needed to test for total internal reflection where the ray does not exit the medium and just gets reflected back into the same object when hitting the surface. 
+            If such total internal reflection exists, we return false indicating that there is no wi vector.</p>
+            <h4>Sampling</h4>
+            <p>
+            After implementation of these two BSDF functions as well as the respective sampling functions for mirror, refractive, and glass materials, we can achieve super realistic renders!
+            The respective sampling functions for mirror and refractive material BSDFs sample from our new functions with probability 1.0 since we have certainty through computation of what wi should be.
+            We also multiply by reflectance or transmittance and divide by abs_cos_theta(wi) to negate the lambertian falloff.
+            For glass materials, there is both reflection and refraction so we simply estimate the ratio of reflection to refraction by coin flipping with probably R = Schlick's reflection coefficient. 
+            The edge case for glass is when there is total internal reflection, then we only reflect.</p>
+        <h4>All of the following images were rendered at 480x360 resolution, 1024 samples per pixel and 8 samples per light.</h4>
+        <p>Using our new functions and BSDFs, here is a showcase of it in action. 
+            We rendered 7 images with increasing maximum ray depths to show how multiple bounces of light works in this scene with our new materials.
+            Note that at a maximum ray depth of 2, we begin to see the mirror ball with specular reflections of its surroundings. 
+            At a maximum ray depth of 3, the glass ball is no longer black and shows refractions of the room around it as well as even caustics below it.
+        </p>
+        <p>
+            At maximum ray depth of 0 we can only see objects that we directly intersect with each ray from their emitted light. In other words, only light sources will appear in the scene.
+            At maximum ray depth of 1, we have direct lighting so walls and objects can trace rays directly from a light source.
+            At this ray depth, the mirror and glass ball still appear to be black because they cannot sample from their surroundings. However, we can see shadows and specular reflections of the direct light.
+            At maximum ray depth of 2, we begin to have indirect lighting. This is when the mirror ball can trace the radiance coming from the surrounding objects which in turn trace to the light source.
+            At maximum ray depths of 3 and above, we finally see refractions in the glass ball as well as some caustics.
+            This is because we can now trace through the ball which in turn traces to its surroundings which in turn traces to the light source.
+            From maximum ray depths of 4 and beyond, we can see more caustics and the glass ball becomes brighter as more rays of light become refracted through it.
+            Notice that we now have a caustic from the ball casted onto the right wall.
+            This is likely a result of the mirror ball reflecting a lot of light from the light source into the glass ball, refracting through the glass ball, hitting the wall, and reaching our eye.
+            There is also a subtle difference between depths 3 and 4 in the reflection of the glass ball on the mirror ball. Notice that the reflection of the glass ball at depth 3 is black.
+            This is because we do not have enough bounces yet to model refraction AND mirroring. For a properly mirrored glass ball, we need at least depth 4.
+        </p>
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                        <img src="images/image10.png" width="480px" />
+                        <figcaption align="middle">CBspheres at max ray depth of 0.</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/image11.png" width="480px" />
+                        <figcaption align="middle">CBspheres at max ray depth of 1.</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="images/image12.png" width="480px" />
+                        <figcaption align="middle">CBspheres at max ray depth of 2.</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/image13.png" width="480px" />
+                        <figcaption align="middle">CBspheres at max ray depth of 3.</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="images/image14.png" width="480px" />
+                        <figcaption align="middle">CBspheres at max ray depth of 4.</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/image15.png" width="480px" />
+                        <figcaption align="middle">CBspheres at max ray depth of 5.</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="images/image16.png" width="480px" />
+                        <figcaption align="middle">CBspheres at max ray depth of 100.</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <p>Here is an example of how to include a simple formula:</p>
+        <p align="middle"><pre align="middle">a^2 + b^2 = c^2</pre></p>
+        <p>or, alternatively, you can include an SVG image of a LaTex formula.</p>
+        <p>This time it's your job to copy-paste in the rest of the sections :)</p>
+
+
+
+    <h2 align="middle">A Few Notes On Webpages</h2>
+        <p>Here are a few problems students have encountered in the past. You will probably encounter these problems at some point, so don't wait until right before the deadline to check that everything is working. Test your website on the instructional machines early!</p>
+        <ul>
+        <li>Your main report page should be called index.html.</li>
+        <li>Be sure to include and turn in all of the other files (such as images) that are linked in your report!</li>
+        <li>Use only <em>relative</em> paths to files, such as <pre>"./images/image.jpg"</pre>
+        Do <em>NOT</em> use absolute paths, such as <pre>"/Users/student/Desktop/image.jpg"</pre></li>
+        <li>Pay close attention to your filename extensions. Remember that on UNIX systems (such as the instructional machines), capitalization matters. <pre>.png != .jpeg != .jpg != .JPG</pre>
+        <li>Be sure to adjust the permissions on your files so that they are world readable. For more information on this please see this tutorial: <a href="http://www.grymoire.com/Unix/Permissions.html">http://www.grymoire.com/Unix/Permissions.html</a></li>
+        <li>And again, test your website on the instructional machines early!</li>
+</div>
+</body>
 </html>
+
+
+
+
