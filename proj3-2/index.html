@@ -1,63 +1,76 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-<style>  
-    div.padded {  
-      padding-top: 0px;  
-      padding-right: 100px;  
-      padding-bottom: 0.25in;  
-      padding-left: 100px;  
-    }  
-  </style> 
-<title>Hao Jie Zhou  |  CS 184</title>
-<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-<link rel="stylesheet" type="text/css" href="style.css" media="screen" />
+    <style>
+        div.padded {
+            padding-top: 0px;
+            padding-right: 100px;
+            padding-bottom: 0.25in;
+            padding-left: 100px;
+        }
+    </style>
+    <title>Hao Jie Zhou  |  CS 184</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" type="text/css" href="style.css" media="screen" />
 </head>
 <body>
-<br />
-<h1 align="middle">Assignment 3: PathTracer</h1>
+    <br />
+    <h1 align="middle">Assignment 3: PathTracer</h1>
     <h2 align="middle">Hao Jie Zhou</h2>
 
     <div class="padded">
-    <h2 align="middle">Project Overview</h2>
-        WRITE OVERVIEW HERE
-    <h2 align="middle">Part 1: Mirror and Glass Materials</h2>
-        <p>In the first part of this project, we implemented reflection and refraction functions so that we can model more advanced types of materials. 
+        <h2 align="middle">Project Overview</h2>
+        <p>
+            This project is a continuation of the pathtracer implemented in 3-1. 
+            In this project, I decided to implement reflection and refraction functions in order to model advanced materials suck as mirrors, metals, and glass (part 1).
+            I also decided to implement depth of field by switching from the pinhole camera model to the thin-lens camera model (part 4).
+            I found this project very interesting because we work with models that closely depict the behavior of light in the real world.
+            After completing part 1, many objects became extremely realistic in appearance such as the light refracting in a glass ball.
+            After completing part 4, the image became realistic by simulating how our eyes and our cameras view the world.
+            Both parts of this project enhanced the immersion that we can achieve through pictures.
+        </p>
+        <h2 align="middle">Part 1: Mirror and Glass Materials</h2>
+        <p>
+            In the first part of this project, we implemented reflection and refraction functions so that we can model more advanced types of materials.
             Particularly, these reflection and refraction functions are necessary for simulation of shiny and transparent objects.
-            </p>
+        </p>
         <h4>Reflection</h4>
-        <p>In the reflection function of our BSDF, we are given a vector representing the ray of light reflecting off of a surface and we want to compute the vector representing 
+        <p>
+            In the reflection function of our BSDF, we are given a vector representing the ray of light reflecting off of a surface and we want to compute the vector representing
             the mirroring solid angle that the ray hits the surface at. This angle is important because we can use it to recursively compute the light coming from that direction (from the next object).
-            This is the perfect specular reflection equation used in my implementation: 
+            This is the perfect specular reflection equation used in my implementation:
         </p>
 
-            <p align="middle"><pre align="middle">wi = -wo + 2 * dot(wo, norm) * norm</pre></p>
+        <p align="middle"><pre align="middle">wi = -wo + 2 * dot(wo, norm) * norm</pre></p>
         <p>
-            What you will notice is that we can swap wi and wo, as the lecture slide computes wo from wi instead. This is because theta(i) is equal to theta(o). 
+            What you will notice is that we can swap wi and wo, as the lecture slide computes wo from wi instead. This is because theta(i) is equal to theta(o).
             In other words, they have the same angle from the normal vector.
         </p>
         <h4>Refraction</h4>
-            <p>
-            In the refraction function of our BSDF, we use Snell's law to compute the refraction direction of a given vector. 
-            This takes into account the index of refraction of the two mediums to compute the entering/exiting angle. 
-            </p>
-            <p align="middle"><pre align="middle">eta_i*sin(theta_i) = eta_t*sin(theta_t)</pre></p>
+        <p>
+            In the refraction function of our BSDF, we use Snell's law to compute the refraction direction of a given vector.
+            This takes into account the index of refraction of the two mediums to compute the entering/exiting angle.
+        </p>
+        <p align="middle"><pre align="middle">eta_i*sin(theta_i) = eta_t*sin(theta_t)</pre></p>
 
-            <p>
+        <p>
             From the Snell's law, we can derive the x, y, and z of the wi vector using functions in the spec that transform wo.
-            We also needed to test for total internal reflection where the ray does not exit the medium and just gets reflected back into the same object when hitting the surface. 
-            If such total internal reflection exists, we return false indicating that there is no wi vector.</p>
-            <h4>Sampling</h4>
-            <p>
+            We also needed to test for total internal reflection where the ray does not exit the medium and just gets reflected back into the same object when hitting the surface.
+            If such total internal reflection exists, we return false indicating that there is no wi vector.
+        </p>
+        <h4>Sampling</h4>
+        <p>
             After implementation of these two BSDF functions as well as the respective sampling functions for mirror, refractive, and glass materials, we can achieve super realistic renders!
             The respective sampling functions for mirror and refractive material BSDFs sample from our new functions with probability 1.0 since we have certainty through computation of what wi should be.
             We also multiply by reflectance or transmittance and divide by abs_cos_theta(wi) to negate the lambertian falloff.
-            For glass materials, there is both reflection and refraction so we simply estimate the ratio of reflection to refraction by coin flipping with probably R = Schlick's reflection coefficient. 
-            The edge case for glass is when there is total internal reflection, then we only reflect.</p>
+            For glass materials, there is both reflection and refraction so we simply estimate the ratio of reflection to refraction by coin flipping with probably R = Schlick's reflection coefficient.
+            The edge case for glass is when there is total internal reflection, then we only reflect.
+        </p>
         <h4>All of the following images were rendered at 480x360 resolution, 1024 samples per pixel and 8 samples per light.</h4>
-        <p>Using our new functions and BSDFs, here is a showcase of it in action. 
+        <p>
+            Using our new functions and BSDFs, here is a showcase of it in action.
             We rendered 7 images with increasing maximum ray depths to show how multiple bounces of light works in this scene with our new materials.
-            Note that at a maximum ray depth of 2, we begin to see the mirror ball with specular reflections of its surroundings. 
+            Note that at a maximum ray depth of 2, we begin to see the mirror ball with specular reflections of its surroundings.
             At a maximum ray depth of 3, the glass ball is no longer black and shows refractions of the room around it as well as even caustics below it.
         </p>
         <p>
@@ -113,24 +126,79 @@
                 </tr>
             </table>
         </div>
-        <p>Here is an example of how to include a simple formula:</p>
-        <p align="middle"><pre align="middle">a^2 + b^2 = c^2</pre></p>
-        <p>or, alternatively, you can include an SVG image of a LaTex formula.</p>
-        <p>This time it's your job to copy-paste in the rest of the sections :)</p>
-
-
-
-    <h2 align="middle">A Few Notes On Webpages</h2>
-        <p>Here are a few problems students have encountered in the past. You will probably encounter these problems at some point, so don't wait until right before the deadline to check that everything is working. Test your website on the instructional machines early!</p>
-        <ul>
-        <li>Your main report page should be called index.html.</li>
-        <li>Be sure to include and turn in all of the other files (such as images) that are linked in your report!</li>
-        <li>Use only <em>relative</em> paths to files, such as <pre>"./images/image.jpg"</pre>
-        Do <em>NOT</em> use absolute paths, such as <pre>"/Users/student/Desktop/image.jpg"</pre></li>
-        <li>Pay close attention to your filename extensions. Remember that on UNIX systems (such as the instructional machines), capitalization matters. <pre>.png != .jpeg != .jpg != .JPG</pre>
-        <li>Be sure to adjust the permissions on your files so that they are world readable. For more information on this please see this tutorial: <a href="http://www.grymoire.com/Unix/Permissions.html">http://www.grymoire.com/Unix/Permissions.html</a></li>
-        <li>And again, test your website on the instructional machines early!</li>
-</div>
+        <h2 align="middle">Part 4: Depth of Field</h2>
+        <p>
+            For my second part of this project, I decided to complete Part 4 (Depth of Field). The depth of field is essentially the range of depth where objects appear clear in an image.
+            Depth of field largely depends on the size of the circle of confusion which in turn depends on aperture (focal length / lens size).
+            The bigger the lens or the shorter the focal length, the shallower the depth of field because light converges at a steeper angle thus diverging at the same steep angle.
+            Our circle of confusion would grow beyond the permissible size fairly quickly. This brings up an important difference between a pinhole camera model and a thin-lens camera model.
+            A pinhole camera model is essentially the equivalent of an infinitely small lens, meaning that we have an infinite depth of field.
+            If we have an infinite depth of field, then the entire scene will always be in focus.
+            The thin-lens camera model is a better approximation for how cameras and our eyes work in the real world, as light rays from a point in the scene that do not converge near the sensor will cause the object to appear blurry and the amount of bluriness depends on factors such as distance, focal length, and lens size.
+            By moving the lens or the sensor, we can shift which objects are in focus by shifting the focal plane.
+            The aperture and focal length of a lens also affects its exposure, which the pinhole camera model cannot simulate as realistically because there is no aperture.
+        </p>
+        <h4>Implementation</h4>
+        <p>
+            The basic principle is based on the Gaussian Thin Lens Equation, which tells us that light coming from an object passing through any point in the lens will converge to the same point on an image plane.
+            This means that instead of only sampling through the middle of the lens (simulating a pinhole model), we can sample at any point on the lens since rays of light from one point on one side will all converge to another point on the other side.
+            We can compute where the rays converge on the other side because we are given a focal distance and can test for intersection with the plane at z=-focalDistance using our original ray from the pinhole model.
+            Computing the convergence point allows us to obtain the direction to that point from any point on our lens by vector subtraction.
+            Then it is simply a matter of normalizing and transforming to world space and creating the ray respective to our camera's location.
+        </p>
+        <h4>Showcase</h4>
+        <p>Focus stack of a scene with a gold dragon with a shallow depth of field (b=1.23) and four different depths in focus.</p>
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                        <img src="images/image20.png" width="480px" />
+                        <figcaption align="middle">CBdragon with head in focus.</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/image21.png" width="480px" />
+                        <figcaption align="middle">CBdragon with body in focus.</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="images/image22.png" width="480px" />
+                        <figcaption align="middle">CBdragon with tail in focus.</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/image23.png" width="480px" />
+                        <figcaption align="middle">CBdragon with back wall in focus.</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <p>A scene with a gold dragon with a fixed focal distance at the head and varying lens radii.</p>
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                        <img src="images/image24.png" width="480px" />
+                        <figcaption align="middle">CBdragon with lens radius 0.1.</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/image25.png" width="480px" />
+                        <figcaption align="middle">CBdragon with lens radius 0.25.</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="images/image26.png" width="480px" />
+                        <figcaption align="middle">CBdragon with lens radius 0.50.</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/image27.png" width="480px" />
+                        <figcaption align="middle">CBdragon with lens radius 1.0.</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <h4>Project website located here: https://cal-cs184-student.github.io/sp22-project-webpages-haojie626/proj3-2/index.html </h4>
+    </div>
 </body>
 </html>
 
