@@ -1,7 +1,88 @@
-<html>
-	<head>
-	</head>
-	<body>
-		Project 4 here
-	</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <style>
+        div.padded {
+            padding-top: 0px;
+            padding-right: 100px;
+            padding-bottom: 0.25in;
+            padding-left: 100px;
+        }
+    </style>
+    <title>Hao Jie Zhou  |  CS 184</title>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet" type="text/css" href="style.css" media="screen" />
+</head>
+<body>
+    <br />
+    <h1 align="middle">Assignment 4: Cloth Sim</h1>
+    <h2 align="middle">Hao Jie Zhou</h2>
+
+    <div class="padded">
+        <h2 align="middle">Project Overview</h2>
+        <p>
+            OVERVIEW HERE
+        </p>
+        <h2 align="middle">Part 1: Masses and Springs</h2>
+        <p>
+            In this part, we implement the foundation of a cloth model by creating a wireframe with point masses and springs.
+            The point masses represent equally distributed points on a cloth surface while the springs help to maintain the relative structure of the points, 
+            preventing weird effects such as shearing and unrealistic bending (think of stretching and folding).
+        </p>
+        <h4>
+            Implementation
+        </h4>
+        <p>
+            Implementation of the point-masses were relatively simple. We can break down the grid positions into sets of rows and columns. Specifically, there are num_width_points row positions and num_height_points column positions.
+            The spacing between each row is given by width / (num_width_points - 1) and the spacing between each column is given by height / (num_height_points - 1). 
+            Now we simply generate a point-mass for each row and each column in that row by multiplying the row number and column number with the respective calculated spacing for each direction and set it as our point-mass positions in construction. 
+            Depending on the orientation of the cloth, the column spacing will determine either the y coordinate or the z coordinate. The row spacing determines the x coordinate regardless of orientation.
+        </p>
+        <p>
+            Implementation of springs required a bit of thinking as I needed to bound which point-masses I can start a spring from in a given direction.
+            For example, when constructing structural springs to a point-mass that is above the current point-mass, we needed to ensure that the current point-mass is not on the topmost row.
+            The same logic is applied to constructing shearing springs for the diagonal direction (ensuring that the current point-mass is not on the topmost row or edge columns) and constructing 
+            bending springs for the point-masses that are two apart (must be at least two away from edge if constructing spring in direction of edge). Overall, I did not encounter any issues with implementation.
+        </p>
+        <h4>Images</h4>
+        <p>
+            Here, we can see four example images rendered using scene/pinned2.json. The first image shows the cloth wireframe fully implemented. The second image shows how the wireframe would look without shearing constraints, allowing the cloth to stretch abnormally.
+            The third image shows only shearing constraints and the fourth image shows all constriants.
+        </p>
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                        <img src="images/image11.png" width="1000px" />
+                        <figcaption align="middle">Cloth wireframe with springs connected to point masses</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="images/image12.png" width="1000px" />
+                        <figcaption align="middle">Cloth wireframe without shearing constraints (only structural and bending)</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="images/image13.png" width="1000px" />
+                        <figcaption align="middle">Cloth wireframe with only shearing constraints</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="images/image14.png" width="1000px" />
+                        <figcaption align="middle">Cloth wireframe with structural, shearing, and bending constraints</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <h4>Project website located here:  </h4>
+    </div>
+</body>
 </html>
+
+
+
+
