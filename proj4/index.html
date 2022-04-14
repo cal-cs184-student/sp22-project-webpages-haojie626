@@ -21,12 +21,14 @@
     <div class="padded">
         <h2 align="middle">Project Overview</h2>
         <p>
-            OVERVIEW HERE
+            In this project, we learned to simulate cloth animation through the use of masses and springs. In particular, we made a cloth that folds and collides with other objects realistically. 
+            By changing attributes such as density, ks, and damping, we are able to change the behavior of the cloth similar to how a real cloth would behave.
+            We also used shaders to implement coloring as it is more efficient than CPU rendering. I did find the implementation of shaders to be difficult, but otherwise the project went smoothly.
         </p>
         <h2 align="middle">Part 1: Masses and Springs</h2>
         <p>
             In this part, we implement the foundation of a cloth model by creating a wireframe with point masses and springs.
-            The point masses represent equally distributed points on a cloth surface while the springs help to maintain the relative structure of the points, 
+            The point masses represent equally distributed points on a cloth surface while the springs help to maintain the relative structure of the points,
             preventing weird effects such as shearing and unrealistic bending (think of stretching and folding).
         </p>
         <h4>
@@ -34,14 +36,15 @@
         </h4>
         <p>
             Implementation of the point-masses were relatively simple. We can break down the grid positions into sets of rows and columns. Specifically, there are num_width_points row positions and num_height_points column positions.
-            The spacing between each row is given by width / (num_width_points - 1) and the spacing between each column is given by height / (num_height_points - 1). 
-            Now we simply generate a point-mass for each row and each column in that row by multiplying the row number and column number with the respective calculated spacing for each direction and set it as our point-mass positions in construction. 
+            The spacing between each row is given by width / (num_width_points - 1) and the spacing between each column is given by height / (num_height_points - 1).
+            Now we simply generate a point-mass for each row and each column in that row by multiplying the row number and column number with the respective calculated spacing for each direction and set it as our point-mass positions in construction.
             Depending on the orientation of the cloth, the column spacing will determine either the y coordinate or the z coordinate. The row spacing determines the x coordinate regardless of orientation.
+            Since the program requires us to store the point-masses in row-major order, we will store one row at a time (each row is parallel to x axis) instead of one column at a time.
         </p>
         <p>
             Implementation of springs required a bit of thinking as I needed to bound which point-masses I can start a spring from in a given direction.
             For example, when constructing structural springs to a point-mass that is above the current point-mass, we needed to ensure that the current point-mass is not on the topmost row.
-            The same logic is applied to constructing shearing springs for the diagonal direction (ensuring that the current point-mass is not on the topmost row or edge columns) and constructing 
+            The same logic is applied to constructing shearing springs for the diagonal direction (ensuring that the current point-mass is not on the topmost row or edge columns) and constructing
             bending springs for the point-masses that are two apart (must be at least two away from edge if constructing spring in direction of edge). Overall, I did not encounter any issues with implementation.
         </p>
         <h4>Images</h4>
@@ -77,8 +80,213 @@
                 </tr>
             </table>
         </div>
-
-        <h4>Project website located here:  </h4>
+        <h2 align="middle">Part 2: Simulation via Numerical Integration</h2>
+        <p>
+            In this part, we simulate cloth movement by first calculating the total/net forces acting on each point-mass including external accelerations and spring forces and then using
+            Verlet integration to compute the new point-mass position over time delta_t using the net acceleration computed by net force divided by mass.
+        </p>
+        <h4>
+            Implementation
+        </h4>
+        <p>
+            In order to compute the net acceleration required for Verlet integration, we need to first compute the net forces acting on each point-mass.
+            The net force is comprised of the sum of mass * each external acceleration and the addition of spring correction forces from each spring connected to that point-mass.
+            If the connected spring's constraint type is enabled, we factor in the spring's correction force which is calculated by the formula:
+            F = k_s * (||p_a - p_b|| - l). Note that k_s is multiplied by 0.2 if the spring is a bending spring. We create a direction vector towards the other point-mass that is connected to the spring and multiply
+            the direction vector by the magnitude of this computed force. This vector represents the force exerted by the spring and is added to the net force.
+            After computing the net force, we can perform Verlet integration as given in the spec using the previous position, current position, and net acceleration which is computed
+            by the formula: a = F / m. In addition, the movement is dampened by a factor d and we constrain position updates such that springs cannot
+            be more than 1.1x its rest length after its connected point-masses have moved.
+        </p>
+        <h4>Observations</h4>
+        <p>
+            Adjusting ks: Decreasing ks allows the cloth to drop more loosely. Increasing ks tightens/stiffens the cloth because the spring's correction force will be greater meaning that
+            point-masses can deviant less from the spring's rest length, allowing the cloth to hold itself up better.
+        </p>
+        <p>
+            Adjusting density: Lowering the density allows the cloth to hold itself up better because the force exerted by external accelerations are lesser. The spring correction forces will have a greater effect
+            and as such, will be able to hold the cloth up. Increasing the density makes the cloth sag lower because it is heavier. External accelerations such as gravity have a greater effect and will eventually overcome the
+            spring correction forces such that it has a hard time holding the cloth up.
+        </p>
+        <p>
+            Adjusting damping: Lowering the damping increases oscillations making the cloth move longer before it comes to rest because there will be less loss in velocity in each timestep of our simulation.
+            Increasing the damping reduces oscillations and allows the cloth to slowly fall to a stable rest.
+        </p>
+        <h4>Images</h4>
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                        <img src="images/image21.png" width="500px" />
+                        <figcaption align="middle">pinned2 with default parameters</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/image22.png" width="500px" />
+                        <figcaption align="middle">pinned2 with increased ks</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="images/image23.png" width="500px" />
+                        <figcaption align="middle">pinned2 with decreased ks</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/image24.png" width="500px" />
+                        <figcaption align="middle">pinned2 with increased density</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="images/image25.png" width="500px" />
+                        <figcaption align="middle">pinned2 with decreased density</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/image26.png" width="500px" />
+                        <figcaption align="middle">pinned2 with increased damping</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="images/image27.png" width="500px" />
+                        <figcaption align="middle">pinned2 with decreased damping</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/image28.png" width="500px" />
+                        <figcaption align="middle">pinned4</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <h2 align="middle">Part 3: Handling collisions with other objects</h2>
+        <p>
+            In this part, we added collision detection to our point-masses such that if a point-mass were to collide with an object, the position would update to the point where it collides with the surface of the object
+            instead of phasing through the object. There are two types of collision objects we are implementing collision for: spheres and planes.
+        </p>
+        <h4>Implementation</h4>
+        <p>
+            For spheres, we first check if the distance between the new position and the origin is less than the radius of the sphere, if this is true then this means a collision has happened.
+            We then compute the point where the point-mass would have entered the sphere by taking the normalized direction vector from the origin to the point-mass's position multiplied by the radius and adding it to the origin of the sphere.
+            Now that we have the tangent point, we recalculate the point-mass's position by moving it from its last position towards the tangent point scaled down by (1-f) for friction.
+        </p>
+        <p>
+            For planes, we first check if we have intersected with the plane by using the line equation test from Lecture 2.
+            If our previous position was on the same side as the normal vector but the next position is on the opposite side or vice versa, we would have opposing signs if we take the dot product between the normal and each of the two positions.
+            After confirming that a collision has occurred, we can determine the point where the point-mass intersects with the plane by using the plane-intersection formula:
+            t = dot((point - last_position), normal) / dot(direction, normal). The direction is computed by: (position - last_position).normalize().
+            Now we can update the position of the point-mass towards the intersection point scaled down by friction (1-f) and adjusted by a small surface offset in the opposite normal direction so the cloth remains on the same side.
+        </p>
+        <h4>Images</h4>
+        <p>
+            Here, we can see a cloth colliding with a sphere with different ks. The lower the ks, the weaker the springs and the more loose/form-fitting the cloth. The higher the ks, the more stiff the cloth becomes.
+            We can also see the cloth colliding with the plane and resting.
+        </p>
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                        <img src="images/image31.png" width="500px" />
+                        <figcaption align="middle">Cloth collision with sphere with ks = 5000</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/image32.png" width="500px" />
+                        <figcaption align="middle">Cloth collision with sphere with ks = 500</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="images/image33.png" width="500px" />
+                        <figcaption align="middle">Cloth collision with sphere with ks = 50000</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/image34.png" width="500px" />
+                        <figcaption align="middle">Cloth collision with plane</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <h2 align="middle">Part 4: Handling Self-Collisions</h2>
+        <p>
+            In this part, we implemented cloth self-collision so that when the cloth folds, it will not clip through itself.
+            Instead of a naive implementation where we do some computation across all point-masses in relation to each other, we create boxes similar to the ray tracing project where we test only the distance between point-masses (in the same box) since those are potentially close enough for interaction.
+        </p>
+        <h4>Implementation</h4>
+        <p>
+            First, we hash the position of each point-mass and assign them to the respective box. To do this, we decide on the dimensions for the box and floor divide each point-mass's position by the box size in each dimension.
+            This will give us the x, y, z number of the box that this point-mass should belong to.
+            We compute a unique float that maps all nearby point-masses to the box by the formula: x + y*256 + z*15000. This reduces the possibility of collisions between x, y, z box coordinates that can give us the same float.
+            Now that we have built a spatial map of the point-masses, we can now test for collisions in each call to simulate.
+        </p>
+        <p>
+            In each call to simulate, we build a spatial map and test for self collisions on each point-mass. We look up the box corresponding to the point-mass and check the distance between it and other point-masses in the same box.
+            If the distance between the two masses are less than 2 * thickness apart, we compute a correction vector and add it to the total correction vector. After checking each point-mass in the box, we average the total correction vector and scale down by simulation_steps to get the final correction vector.
+            This final correction vector gets applied to the target point-mass.
+        </p>
+        <h4>Images</h4>
+        <p>
+            In these images, we can see our cloth folding on itself and not clipping through. You can see three pictures showing different timesteps in the fall and four pictures of low/high density and low/high ks.
+            If we increase the density, the cloth becomes heavier thus becoming more flat and folding more. If we lower the density, the cloth becomes lighter and produces fewer folds.
+            If we increase the ks, the cloth becomes stiffer and creates larger, fewer folds. If we lower the ks, the folds become smaller and more.
+        </p>
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                        <img src="images/image41.png" width="500px" />
+                        <figcaption align="middle">Early in cloth folding</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/image42.png" width="500px" />
+                        <figcaption align="middle">Middle of cloth folding</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="images/image43.png" width="500px" />
+                        <figcaption align="middle">Late in cloth folding</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/image44.png" width="500px" />
+                        <figcaption align="middle">High density</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="images/image45.png" width="500px" />
+                        <figcaption align="middle">Low density</figcaption>
+                    </td>
+                    <td align="middle">
+                        <img src="images/image46.png" width="500px" />
+                        <figcaption align="middle">Low ks</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                        <img src="images/image47.png" width="500px" />
+                        <figcaption align="middle">High ks</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <h2 align="middle">Part 5: Shaders</h2>
+        <p>
+            In the last part of this project, we implement shaders to apply different shading and textures to our objects.
+            In short, a shader program is a program that runs in parallel on a GPU to output a 4-dimensional vector that can represent things such as positions, normals, colors, etc.
+            Since GPUs have thousands of cores, many shader programs run in parallel and is much better in rendering compared to on a CPU.
+            Vertex shaders deal with changing positions and normals of vertices while fragment shaders take the output of vertex shaders and output colors after some computation depending on the type of shading.
+            Unfortunately, this part was too difficult for me and I was only able to complete the diffuse shader. Here is an image of a diffuse shader on my cloth.
+        </p>
+        <h4>Images</h4>
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                        <img src="images/image51.png" width="500px" />
+                        <figcaption align="middle">Diffuse shader on cloth</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <h4>Project website located here: https://cal-cs184-student.github.io/sp22-project-webpages-haojie626/proj4/index.html</h4>
     </div>
 </body>
 </html>
